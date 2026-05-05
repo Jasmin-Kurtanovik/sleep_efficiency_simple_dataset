@@ -229,10 +229,11 @@ class PerUserVisualizer:
 def create_model_comparison_plot(
     results_att_path: str = 'evaluation_results/evaluation_results.json',
     results_no_att_path: str = 'evaluation_results/evaluation_results_without_att.json',
+    results_transformer_path: str = 'evaluation_results_transformer/evaluation_results_transformer.json',
     output_dir: str = 'evaluation_results'
 ):
     """
-    Create comparison plots between models with and without attention.
+    Create comparison plots between the two LSTM variants and the Transformer.
     
     Args:
         results_att_path: Path to attention model results
@@ -248,27 +249,39 @@ def create_model_comparison_plot(
             att_results = json.load(f)
         with open(results_no_att_path, 'r') as f:
             no_att_results = json.load(f)
+        transformer_results = None
+        if results_transformer_path and Path(results_transformer_path).exists():
+            with open(results_transformer_path, 'r') as f:
+                transformer_results = json.load(f)
     except FileNotFoundError as e:
         logger.warning(f'Could not load results for comparison: {e}')
         return
     
     att_agg = att_results.get('aggregated_metrics') or att_results.get('aggregated', {})
     no_att_agg = no_att_results.get('aggregated_metrics') or no_att_results.get('aggregated', {})
+    transformer_agg = {}
+    if transformer_results is not None:
+        transformer_agg = transformer_results.get('aggregated_metrics') or transformer_results.get('aggregated', {})
     
     # Extract metrics
     models = ['With Attention', 'Without Attention']
     rmse_vals = [att_agg.get('rmse', 0), no_att_agg.get('rmse', 0)]
     mae_vals = [att_agg.get('mae', 0), no_att_agg.get('mae', 0)]
     r2_vals = [att_agg.get('r2', 0), no_att_agg.get('r2', 0)]
+    if transformer_results is not None:
+        models.append('Transformer')
+        rmse_vals.append(transformer_agg.get('rmse', 0))
+        mae_vals.append(transformer_agg.get('mae', 0))
+        r2_vals.append(transformer_agg.get('r2', 0))
     
     # Create comparison figure
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
-    fig.suptitle('Model Comparison: LSTM with vs without Attention', fontsize=16, fontweight='bold')
+    fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+    fig.suptitle('Model Comparison: LSTM with vs without Attention vs Transformer', fontsize=16, fontweight='bold')
     
     # RMSE comparison
     ax = axes[0]
-    colors = ['#1f77b4', '#ff7f0e']
-    bars = ax.bar(models, rmse_vals, color=colors, alpha=0.7, edgecolor='black', linewidth=2)
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
+    bars = ax.bar(models, rmse_vals, color=colors[:len(models)], alpha=0.7, edgecolor='black', linewidth=2)
     ax.set_ylabel('RMSE', fontsize=12)
     ax.set_title('Root Mean Squared Error (Lower is Better)', fontsize=12, fontweight='bold')
     ax.grid(True, alpha=0.3, axis='y')
@@ -280,7 +293,7 @@ def create_model_comparison_plot(
     
     # MAE comparison
     ax = axes[1]
-    bars = ax.bar(models, mae_vals, color=colors, alpha=0.7, edgecolor='black', linewidth=2)
+    bars = ax.bar(models, mae_vals, color=colors[:len(models)], alpha=0.7, edgecolor='black', linewidth=2)
     ax.set_ylabel('MAE', fontsize=12)
     ax.set_title('Mean Absolute Error (Lower is Better)', fontsize=12, fontweight='bold')
     ax.grid(True, alpha=0.3, axis='y')
@@ -292,7 +305,7 @@ def create_model_comparison_plot(
     
     # R² comparison
     ax = axes[2]
-    bars = ax.bar(models, r2_vals, color=colors, alpha=0.7, edgecolor='black', linewidth=2)
+    bars = ax.bar(models, r2_vals, color=colors[:len(models)], alpha=0.7, edgecolor='black', linewidth=2)
     ax.set_ylabel('R² Score', fontsize=12)
     ax.set_title('R² Score (Higher is Better)', fontsize=12, fontweight='bold')
     ax.set_ylim([-5, 1])

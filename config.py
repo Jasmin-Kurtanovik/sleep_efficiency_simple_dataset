@@ -13,9 +13,14 @@ HISTORY_SAVE_DIR = str(ROOT_DIR / "models" / "history")
 EVALUATION_RESULTS_DIR = str(ROOT_DIR / "evaluation_results")
 PLOTS_SAVE_DIR = str(ROOT_DIR / "evaluation_results" / "plots_per_user")
 
+MODEL_SAVE_PATH_TRANSFORMER = str(ROOT_DIR / "models" / "best_model_transformer.pt")
+HISTORY_SAVE_DIR_TRANSFORMER = str(ROOT_DIR / "models" / "history_transformer")
+EVALUATION_RESULTS_DIR_TRANSFORMER = str(ROOT_DIR / "evaluation_results_transformer")
+PLOTS_SAVE_DIR_TRANSFORMER = str(ROOT_DIR / "evaluation_results_transformer" / "plots_per_user")
+
 # Most important experiment knobs.
-LOOKBACK_DAYS = 3
-SEQUENCE_LENGTH = 3
+LOOKBACK_DAYS = 7
+SEQUENCE_LENGTH = 7
 INPUT_SIZE = 6
 OUTPUT_SIZE = 1
 HIDDEN_SIZE = 64
@@ -23,10 +28,15 @@ NUM_LAYERS = 4
 DROPOUT = 0.2
 USER_EMB_DIM = 16
 
+TRANSFORMER_NUM_HEADS = 4
+TRANSFORMER_NUM_LAYERS = 2
+TRANSFORMER_FF_DIM = 128
+TRANSFORMER_MAX_SEQ_LEN = 32
+
 BATCH_SIZE = 32
 LEARNING_RATE = 1e-3
 WEIGHT_DECAY = 1e-5
-MAX_EPOCHS = 50
+MAX_EPOCHS = 200
 EARLY_STOPPING_PATIENCE = 10
 LR_SCHEDULER_PATIENCE = 3
 
@@ -48,6 +58,10 @@ def get_config_dict() -> dict:
         "history_save_dir": HISTORY_SAVE_DIR,
         "evaluation_results_dir": EVALUATION_RESULTS_DIR,
         "plots_save_dir": PLOTS_SAVE_DIR,
+        "model_save_path_transformer": MODEL_SAVE_PATH_TRANSFORMER,
+        "history_save_dir_transformer": HISTORY_SAVE_DIR_TRANSFORMER,
+        "evaluation_results_dir_transformer": EVALUATION_RESULTS_DIR_TRANSFORMER,
+        "plots_save_dir_transformer": PLOTS_SAVE_DIR_TRANSFORMER,
         "lookback_days": LOOKBACK_DAYS,
         "input_size": INPUT_SIZE,
         "output_size": OUTPUT_SIZE,
@@ -64,6 +78,10 @@ def get_config_dict() -> dict:
         "train_ratio": TRAIN_RATIO,
         "val_ratio": VAL_RATIO,
         "random_seed": RANDOM_SEED,
+        "transformer_num_heads": TRANSFORMER_NUM_HEADS,
+        "transformer_num_layers": TRANSFORMER_NUM_LAYERS,
+        "transformer_ff_dim": TRANSFORMER_FF_DIM,
+        "transformer_max_seq_len": TRANSFORMER_MAX_SEQ_LEN,
         "device": str(get_device()),
     }
 
@@ -87,6 +105,9 @@ def print_config() -> None:
         "train_ratio",
         "val_ratio",
         "random_seed",
+        "transformer_num_heads",
+        "transformer_num_layers",
+        "transformer_ff_dim",
         "device",
     ]:
         print(f"{key}: {config[key]}")

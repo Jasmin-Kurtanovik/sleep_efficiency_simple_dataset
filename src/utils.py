@@ -63,7 +63,7 @@ def create_data_loaders(
     val_dataset = TimeSeriesDataset(val_data, sequence_length)
     test_dataset = TimeSeriesDataset(test_data, sequence_length)
     
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=shuffle)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle= False)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
     

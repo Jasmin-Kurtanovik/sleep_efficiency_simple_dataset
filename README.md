@@ -1,6 +1,6 @@
 # LSTM Sleep Diary Project
 
-This project predicts sleep efficiency from a short history of sleep diary entries using an LSTM-based regression model. It includes two model variants, a preprocessing pipeline that builds user-aware sequences, and evaluation scripts that produce per-user metrics and plots.
+This project predicts sleep efficiency from a short history of sleep diary entries using sequence models. It includes three model variants, a preprocessing pipeline that builds user-aware sequences, and evaluation scripts that produce per-user metrics and plots.
 
 ## What the project does
 
@@ -10,7 +10,7 @@ The project is organized around three stages:
 
 1. preprocess the raw diary data,
 2. train the LSTM model,
-3. evaluate the model on held-out users and compare variants.
+3. evaluate the models on held-out users and compare variants.
 
 ## Model architecture
 
@@ -73,6 +73,14 @@ It uses the same LSTM and the same optional user embedding, but it skips the att
 
 This baseline is useful because it shows whether attention actually improves performance.
 
+## Transformer model
+
+The Transformer model is in [src/model_transformer.py](src/model_transformer.py).
+
+It uses the same input sequences and the same optional user embedding, but replaces the LSTM block with a Transformer encoder. A learned positional embedding is added so the model can keep track of the order of the days in the sequence. The output sequence is pooled into one context vector and passed through the same type of regression head used by the LSTM models.
+
+This model is useful as a stronger sequence-model comparison point because it can learn relationships across all timesteps directly through attention.
+
 ## Data preprocessing pipeline
 
 The preprocessing code is in [src/data_preprocessor.py](src/data_preprocessor.py).
@@ -119,6 +127,7 @@ The preprocessing code is in [src/data_preprocessor.py](src/data_preprocessor.py
 ## Training
 
 Training happens in [src/train_validate.py](src/train_validate.py) for the attention model and [src/train_validate_without_att.py](src/train_validate_without_att.py) for the baseline.
+Transformer training happens in [src/train_validate_transformer.py](src/train_validate_transformer.py).
 
 The training setup uses:
 
@@ -133,6 +142,7 @@ The model is trained on user-split data from the preprocessor, and the best chec
 ## Evaluation and comparison
 
 Evaluation happens in [src/test_model.py](src/test_model.py) and [src/test_model_without_att.py](src/test_model_without_att.py).
+Transformer evaluation happens in [src/test_model_transformer.py](src/test_model_transformer.py).
 
 These scripts:
 
@@ -144,6 +154,7 @@ These scripts:
 - create per-user prediction plots.
 
 The model comparison plot is created in [src/visualize_per_user.py](src/visualize_per_user.py). It compares the aggregated metrics from the attention and no-attention runs side by side.
+It now also includes the Transformer results.
 
 ## Main files
 
@@ -151,23 +162,30 @@ The model comparison plot is created in [src/visualize_per_user.py](src/visualiz
 - [run.py](run.py) runs both training pipelines and both evaluation pipelines.
 - [src/model.py](src/model.py) contains the attention-based model.
 - [src/model_without_att.py](src/model_without_att.py) contains the baseline model.
+- [src/model_transformer.py](src/model_transformer.py) contains the Transformer model.
 - [src/data_preprocessor.py](src/data_preprocessor.py) prepares the data.
 - [src/train_validate.py](src/train_validate.py) trains the attention model.
 - [src/train_validate_without_att.py](src/train_validate_without_att.py) trains the baseline model.
+- [src/train_validate_transformer.py](src/train_validate_transformer.py) trains the Transformer model.
 - [src/test_model.py](src/test_model.py) evaluates the attention model.
 - [src/test_model_without_att.py](src/test_model_without_att.py) evaluates the baseline model.
+- [src/test_model_transformer.py](src/test_model_transformer.py) evaluates the Transformer model.
 - [src/visualize_per_user.py](src/visualize_per_user.py) creates plots and comparison figures.
 
 ## Outputs
 
 - `models/best_model.pt` stores the best attention-model checkpoint.
 - `models/best_model_without_att.pt` stores the best no-attention checkpoint.
+- `models/best_model_transformer.pt` stores the best Transformer checkpoint.
 - `models/history/` stores training history files for the attention model.
 - `models/history_without_att_*.json` stores training summaries for the baseline.
+- `models/history_transformer/` stores training history files for the Transformer model.
 - `evaluation_results/evaluation_results.json` stores attention-model evaluation metrics.
 - `evaluation_results/evaluation_results_without_att.json` stores baseline evaluation metrics.
+- `evaluation_results_transformer/evaluation_results_transformer.json` stores Transformer evaluation metrics.
 - `evaluation_results/plots_per_user/` stores attention-model per-user plots.
 - `evaluation_results_without_att/plots_per_user/` stores baseline per-user plots.
+- `evaluation_results_transformer/plots_per_user/` stores Transformer per-user plots.
 - `evaluation_results/model_comparison.png` stores the comparison chart.
 
 ## How to run
@@ -178,6 +196,8 @@ Train and evaluate both models with the unified runner:
 python run.py
 ```
 
+This runs all three models and updates the comparison plot.
+
 If you want to run them separately:
 
 ```bash
@@ -185,6 +205,8 @@ python src/train_validate.py
 python src/test_model.py
 python src/train_validate_without_att.py
 python src/test_model_without_att.py
+python src/train_validate_transformer.py
+python src/test_model_transformer.py
 ```
 
 ## Important configuration values

@@ -72,9 +72,11 @@ models/*.pt
 models/*.pth
 models/history_*.json
 models/history/
+models/history_transformer/
 data/*.csv
 data/*.xlsx
 !data/.gitkeep
 evaluation_results/
 evaluation_results_without_att/
+evaluation_results_transformer/
 *.log
